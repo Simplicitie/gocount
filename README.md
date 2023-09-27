@@ -34,6 +34,7 @@ The application publishes a REST interface on port `8080` with the following end
   * `/`  - Displays a greeting and usage information
   * `/count` - Displays the current counter's value
   * `/incr` - Increments the counter's value by 1 and displays the new value
+  * `/reset` - Sets the count back to 0.  **NOTE:** This does not fully erase the key in Redis, it just forces the value to be returned to 0.
 
 Each of these endpoints can be reached via a web browser (IE: http://localhost:8080/count) or with the `curl` command:
 ```
