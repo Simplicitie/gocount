@@ -36,19 +36,14 @@ func main() {
 
 	ctx = context.Background()
 
-	// Set the initial count to 0
-	err = client.Set(ctx, "count", 0, 0).Err()
-	if err != nil {
-		panic(err)
-	}
-
 	// Start the Gin web Server
 	r := gin.Default()
 	r.GET("/", func(c *gin.Context) {
-		c.String(200, "Welcome to my counter!\n  To check the current count navigate to /count\n  To add one to the number, navigate to /incr")
+		c.String(200, "Welcome to my counter!\n  To check the current count navigate to /count\n  To add one to the number, navigate to /incr\n  To reset the number to 0, navigate to /reset")
 	})
 	r.GET("/incr", incrCountByOne)
 	r.GET("/count", getCount)
+	r.GET("/reset", resetCount)
 	r.Run() // listen and serve on 0.0.0.0:8080
 }
 
@@ -57,7 +52,11 @@ func getCount(c *gin.Context) {
 	if err != nil {
 		c.Error(err)
 	}
-	c.String(200, fmt.Sprintln("Current count:", val))
+	if val == "" {
+		c.String(200, fmt.Sprintln("Current count is blank/nil!\n  Start counting by navigating to /incr."))
+	} else {
+		c.String(200, fmt.Sprintln("Current count:", val))
+	}
 }
 
 func incrCountByOne(c *gin.Context) {
@@ -66,4 +65,12 @@ func incrCountByOne(c *gin.Context) {
 		c.Error(err)
 	}
 	c.String(200, fmt.Sprintln("Count incremented by one and is now:", count))
+}
+
+func resetCount(c *gin.Context) {
+	err := client.Set(ctx, "count", 0, 0).Err()
+	if err != nil {
+		panic(err)
+	}
+	c.String(200, fmt.Sprintln("Count reset to 0"))
 }
