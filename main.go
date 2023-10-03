@@ -3,12 +3,14 @@ package main
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"os"
 
 	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
 )
 
+var connection_string string
 var client *redis.Client
 var ctx context.Context
 
@@ -49,20 +51,23 @@ func main() {
 
 func getCount(c *gin.Context) {
 	val, err := client.Get(ctx, "count").Result()
-	if err != nil {
+	if err != nil && err != redis.Nil {
 		c.Error(err)
-	}
-	if val == "" {
+		c.String(http.StatusGatewayTimeout, "Error getting the count :(\n  Is Redis up?")
+		return
+	} else if err == redis.Nil {
 		c.String(200, fmt.Sprintln("Current count is blank/nil!\n  Start counting by navigating to /incr."))
-	} else {
-		c.String(200, fmt.Sprintln("Current count:", val))
+		return
 	}
+	c.String(200, fmt.Sprintln("Current count:", val))
 }
 
 func incrCountByOne(c *gin.Context) {
 	count, err := client.Incr(ctx, "count").Result()
 	if err != nil {
 		c.Error(err)
+		c.String(http.StatusGatewayTimeout, "Error incrementing the count :(\n  Is Redis up?")
+		return
 	}
 	c.String(200, fmt.Sprintln("Count incremented by one and is now:", count))
 }
@@ -70,7 +75,9 @@ func incrCountByOne(c *gin.Context) {
 func resetCount(c *gin.Context) {
 	err := client.Set(ctx, "count", 0, 0).Err()
 	if err != nil {
-		panic(err)
+		c.Error(err)
+		c.String(http.StatusGatewayTimeout, "Error reseting the count :(\n  Is Redis up?")
+		return
 	}
 	c.String(200, fmt.Sprintln("Count reset to 0"))
 }
