@@ -10,7 +10,6 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-var connection_string string
 var client *redis.Client
 var ctx context.Context
 
@@ -29,8 +28,8 @@ func main() {
 	}
 
 	// establish connection to the Redis instence
-	connection_string := fmt.Sprintf("redis://%s:%s@%s:%s/1", uname, pass, host, port)
-	opt, err := redis.ParseURL(connection_string)
+	connectionString := fmt.Sprintf("redis://%s:%s@%s:%s/1", uname, pass, host, port)
+	opt, err := redis.ParseURL(connectionString)
 	if err != nil {
 		panic(err)
 	}
